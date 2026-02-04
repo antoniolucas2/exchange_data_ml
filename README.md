@@ -16,7 +16,7 @@ Primariamente, usando TensorFlow, foi pensado na utilização dos seguintes RPC'
 * SimpleHTTPServer.
 
 <p align="center">
-  <img src="./Serializar.png" width="50%" title="Ilustração workflow">
+  <img src="./Serializar.png" width="75%" title="Ilustração workflow">
 </p>
 
 ## TODO
