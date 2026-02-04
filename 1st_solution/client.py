@@ -3,7 +3,6 @@ import numpy as np
 
 model_a = build_mlp()
 
-# Dummy training
 x = np.random.rand(100, 10)
 y = np.random.rand(100, 2)
 model_a.fit(x, y, epochs=5, verbose=0)

@@ -41,3 +41,4 @@ python client.py
 
 * O flow de dados não é bidirecional, cabendo ainda sua implementação.
 * A conexão não é segura, pois não é encriptada.
+* O treinamento, até o momento, é apenas "de mentira", somente pra setar pesos no modelo.

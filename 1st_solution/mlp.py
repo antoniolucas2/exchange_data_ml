@@ -1,6 +1,10 @@
 import tensorflow as tf
 from keras import layers, models
-import threading, time
+import numpy as np
+
+import grpc
+from concurrent import futures
+import model_pb2, model_pb2_grpc
 
 def build_mlp():
     model = models.Sequential([
@@ -22,17 +26,12 @@ def serialize_weights(model):
         })
     return tensors
 
-import numpy as np
-
 def load_weights(model, tensors):
     weights = []
     for tensor in tensors:
         arr = np.array(tensor.values, dtype=np.float32)
         weights.append(arr.reshape(tensor.shape))
     model.set_weights(weights)
-
-import grpc
-import model_pb2, model_pb2_grpc
 
 def send_weights(model):
     channel = grpc.insecure_channel("localhost:50051")
@@ -49,10 +48,6 @@ def send_weights(model):
         model_pb2.ModelWeights(tensors=proto_tensors)
     )
     print(response.msg)
-
-import grpc
-from concurrent import futures
-import model_pb2, model_pb2_grpc
 
 class ModelServer(model_pb2_grpc.ModelExchangeServicer):
     def __init__(self, model, server):
