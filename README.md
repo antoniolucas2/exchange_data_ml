@@ -13,7 +13,8 @@ Primariamente, usando TensorFlow, foi pensado na utilização dos seguintes RPC'
 
 * gRPC -> Pasta 1st_solution;
 * FastAPI;
-* SimpleHTTPServer.
+* SimpleHTTPServer;
+* MQTT.
 
 <p align="center">
   <img src="./Serializar.png" width="75%" title="Ilustração workflow">
