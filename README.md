@@ -15,4 +15,4 @@ Primariamente, usando TensorFlow, foi pensado na utilização dos seguintes RPC'
 
 ## TODO
 
-* [] Analisar a viabilidade do gRPC e implementar as outras soluções, se necessárias.
+* [ ] Analisar a viabilidade do gRPC e implementar as outras soluções, se necessárias.
