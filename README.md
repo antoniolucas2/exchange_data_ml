@@ -15,7 +15,9 @@ Primariamente, usando TensorFlow, foi pensado na utilização dos seguintes RPC'
 * FastAPI;
 * SimpleHTTPServer.
 
-![Workflow](./Serializar.png)
+<p align="center">
+  <img src="./Serializar.png" width="50%" title="Ilustração workflow">
+</p>
 
 ## TODO
 
