@@ -12,6 +12,5 @@ print('PESOS DO MODELO QUE VAI MANDAR')
 for w in model_a.get_weights():
     print(np.mean(w), np.std(w))
 
-
 send_weights(model_a)
 
