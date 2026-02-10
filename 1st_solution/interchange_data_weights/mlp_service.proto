@@ -2,25 +2,22 @@ syntax = "proto3";
 
 package mlp;
 
-// Service definition
 service MLPExchange {
-  // Exchange Model Weights
+
   rpc SendWeights (WeightUpdate) returns (Ack) {}
   
-  // Exchange Training Data
   rpc SendData (DataBatch) returns (Ack) {}
 }
 
-// A single tensor (NumPy array) serialization
 message NDArray {
-  bytes data = 1;       // Raw byte data of the array
-  repeated int32 shape = 2; // Shape dimensions
-  string dtype = 3;     // Data type (e.g., "float32")
+  bytes data = 1;       
+  repeated int32 shape = 2;
+  string dtype = 3;     
 }
 
 message WeightUpdate {
   string sender_id = 1;
-  repeated NDArray weights = 2; // A list of arrays (layers)
+  repeated NDArray weights = 2; 
   int32 step = 3;
 }
 

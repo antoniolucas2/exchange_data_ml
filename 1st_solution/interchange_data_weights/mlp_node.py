@@ -6,13 +6,11 @@ import tensorflow as tf
 from concurrent import futures
 import grpc
 
-# Import generated classes
 import mlp_service_pb2
 import mlp_service_pb2_grpc
 
-# --- Helper Functions for Serialization ---
 def numpy_to_proto(array):
-    """Convert a NumPy array to an NDArray proto message."""
+
     return mlp_service_pb2.NDArray(
         data=array.tobytes(),
         shape=array.shape,
@@ -20,11 +18,9 @@ def numpy_to_proto(array):
     )
 
 def proto_to_numpy(proto_array):
-    """Convert an NDArray proto message back to a NumPy array."""
     array = np.frombuffer(proto_array.data, dtype=proto_array.dtype)
     return array.reshape(proto_array.shape)
 
-# --- The TensorFlow Model ---
 def create_mlp():
     model = tf.keras.Sequential([
         tf.keras.layers.Dense(32, activation='relu', input_shape=(10,)),
@@ -34,7 +30,6 @@ def create_mlp():
     model.compile(optimizer='adam', loss='binary_crossentropy')
     return model
 
-# --- gRPC Server Implementation ---
 class MLPServiceServicer(mlp_service_pb2_grpc.MLPExchangeServicer):
     def __init__(self, node_id, model):
         self.node_id = node_id
@@ -43,11 +38,13 @@ class MLPServiceServicer(mlp_service_pb2_grpc.MLPExchangeServicer):
     def SendWeights(self, request, context):
         print(f"[{self.node_id}] Received WEIGHTS from {request.sender_id} (Step {request.step})")
         
-        # Deserialize weights
         new_weights = [proto_to_numpy(w) for w in request.weights]
+
+        print('Received weights from peer')
+
+        for weight in new_weights:
+            print(weight)
         
-        # Simple strategy: Average received weights with local weights
-        # (Federated Averaging style)
         current_weights = self.model.get_weights()
         averaged_weights = []
         for w_local, w_remote in zip(current_weights, new_weights):
@@ -60,17 +57,15 @@ class MLPServiceServicer(mlp_service_pb2_grpc.MLPExchangeServicer):
 
     def SendData(self, request, context):
         print(f"[{self.node_id}] Received DATA from {request.sender_id}")
-        
+
         X = proto_to_numpy(request.features)
         y = proto_to_numpy(request.labels)
         
-        # Train immediately on received data (Online Learning)
         print(f"[{self.node_id}] Training on received data...")
         self.model.fit(X, y, verbose=0, epochs=1)
         
         return mlp_service_pb2.Ack(success=True, message="Data trained")
 
-# --- Main Node Logic ---
 class MLPNode:
     def __init__(self, node_id, port, peer_port):
         self.node_id = node_id
@@ -80,7 +75,7 @@ class MLPNode:
         self.stop_event = threading.Event()
 
     def start_server(self):
-        """Starts the gRPC server to listen for incoming data/weights."""
+
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         mlp_service_pb2_grpc.add_MLPExchangeServicer_to_server(
             MLPServiceServicer(self.node_id, self.model), server
@@ -91,8 +86,7 @@ class MLPNode:
         return server
 
     def run_client_loop(self):
-        """Simulates training and pushing updates to the peer."""
-        # Wait a bit for the other node to start
+
         time.sleep(5)
         
         channel = grpc.insecure_channel(f'localhost:{self.peer_port}')
@@ -103,18 +97,23 @@ class MLPNode:
             step += 1
             print(f"\n[{self.node_id}] --- Step {step} ---")
             
-            # 1. Generate Random Data
             X_train = np.random.rand(32, 10).astype(np.float32)
             y_train = np.random.randint(2, size=(32, 1)).astype(np.float32)
             
-            # 2. Train Locally
             print(f"[{self.node_id}] Training locally...")
             self.model.fit(X_train, y_train, verbose=0, epochs=1)
+
+            print('Which action do you want choose to do?')
+            action = input('0: Send weights to peer, 1: Send data to peer: ')
             
-            # 3. Decision: Share Data or Weights? (Randomly choose)
-            if np.random.random() > 0.5:
-                # -- Share Weights --
+            if action == '0':
                 print(f"[{self.node_id}] Sending WEIGHTS to peer...")
+
+                print('Weights being sent:')
+
+                for weight in self.model.get_weights():
+                    print(weight)
+
                 try:
                     weights_proto = [numpy_to_proto(w) for w in self.model.get_weights()]
                     stub.SendWeights(mlp_service_pb2.WeightUpdate(
@@ -124,8 +123,7 @@ class MLPNode:
                     ))
                 except grpc.RpcError as e:
                     print(f"[{self.node_id}] Failed to send weights: {e.code()}")
-            else:
-                # -- Share Data --
+            elif action == '1':
                 print(f"[{self.node_id}] Sending DATA to peer...")
                 try:
                     stub.SendData(mlp_service_pb2.DataBatch(
@@ -136,7 +134,7 @@ class MLPNode:
                 except grpc.RpcError as e:
                     print(f"[{self.node_id}] Failed to send data: {e.code()}")
             
-            time.sleep(3) # Wait before next iteration
+            time.sleep(3)
 
 if __name__ == '__main__':
     if len(sys.argv) != 4:
