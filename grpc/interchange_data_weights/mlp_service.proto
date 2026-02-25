@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package mlp;
+
+service MLPExchange {
+
+  rpc SendWeights (WeightUpdate) returns (Ack) {}
+  
+  rpc SendData (DataBatch) returns (Ack) {}
+}
+
+message NDArray {
+  bytes data = 1;       
+  repeated int32 shape = 2;
+  string dtype = 3;     
+}
+
+message WeightUpdate {
+  string sender_id = 1;
+  repeated NDArray weights = 2; 
+  int32 step = 3;
+}
+
+message DataBatch {
+  string sender_id = 1;
+  NDArray features = 2;
+  NDArray labels = 3;
+}
+
+message Ack {
+  bool success = 1;
+  string message = 2;
+}

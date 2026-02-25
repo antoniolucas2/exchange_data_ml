@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+message Tensor {
+  repeated float values = 1;
+  repeated int64 shape = 2;
+}
+
+message ModelWeights {
+  repeated Tensor tensors = 1;
+}
+
+message Ack {
+  string msg = 1;
+}
+
+service ModelExchange {
+  rpc SendWeights(ModelWeights) returns (Ack);
+}
+
