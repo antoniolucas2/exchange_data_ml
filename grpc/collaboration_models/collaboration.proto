@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+// Defines the package namespace
+package nids;
+
+// The service defines the endpoints (ports) our models will listen to
+service NidsCollaboration {
+  // Model A calls this to ask Model B for a second opinion
+  rpc RequestPrediction (FlowBatch) returns (PredictionBatch) {}
+}
+
+// The incoming network traffic (The attack)
+message FlowBatch {
+  // We flatten the 2D numpy array into a 1D list of floats for network speed
+  repeated float features = 1;
+  int32 batch_size = 2;
+  int32 input_dim = 3; 
+}
+
+// The response from the model
+message PredictionBatch {
+  // Returns a list of predicted classes (0 for Benign, 1-33 for Attacks)
+  repeated int32 predictions = 1;
+}
