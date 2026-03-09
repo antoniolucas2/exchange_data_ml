@@ -2,3 +2,5 @@ test
 train
 validation
 __pycache__
+*.keras
+*.txt
