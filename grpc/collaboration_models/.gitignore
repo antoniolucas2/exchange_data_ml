@@ -2,7 +2,6 @@ test
 train
 validation
 __pycache__
-*.keras
 *.txt
 *.pkl
 plots_e_resultados/*
