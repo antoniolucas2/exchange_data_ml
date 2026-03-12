@@ -21,4 +21,5 @@ message FlowBatch {
 message PredictionBatch {
   // Returns a list of predicted classes (0 for Benign, 1-33 for Attacks)
   repeated int32 predictions = 1;
+  repeated float confidences = 2;
 }

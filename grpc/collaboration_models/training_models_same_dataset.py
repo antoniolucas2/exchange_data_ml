@@ -169,34 +169,34 @@ model_b = create_nids_mlp(input_dimension, num_classes=num_classes)
 half_point_train = len(X_train_processed) // 2
 half_point_validation = len(X_val_processed) // 2
 
-X_train_A = X_train_processed[:half_point_train]
-y_train_A = y_train_encoded[:half_point_train]
+#X_train_A = X_train_processed[:half_point_train]
+#y_train_A = y_train_encoded[:half_point_train]
 
-X_train_B = X_train_processed[half_point_train:]
-y_train_B = y_train_encoded[half_point_train:]
+#X_train_B = X_train_processed[half_point_train:]
+#y_train_B = y_train_encoded[half_point_train:]
 
-X_val_A = X_val_processed[:half_point_validation]
-y_val_A = y_val_encoded[:half_point_validation]
+#X_val_A = X_val_processed[:half_point_validation]
+#y_val_A = y_val_encoded[:half_point_validation]
 
-X_val_B = X_val_processed[half_point_validation:]
-y_val_B = y_val_encoded[half_point_validation:]
+#X_val_B = X_val_processed[half_point_validation:]
+#y_val_B = y_val_encoded[half_point_validation:]
 
 #X_train_A, y_train_A = oversample_dataset(X_train_A, y_train_A)
 #X_train_B, y_train_B = oversample_dataset(X_train_B, y_train_B)
 
-batch_size = 256
-epochs = 40
+batch_size = 1024
+epochs = 60
 
-early_stopper_a = EarlyStopping(monitor = 'val_loss', patience=6, restore_best_weights=True, verbose=1)
-early_stopper_b = EarlyStopping(monitor = 'val_loss', patience=6, restore_best_weights=True, verbose=1)
+early_stopper_a = EarlyStopping(monitor = 'val_loss', patience=10, restore_best_weights=True, verbose=1)
+early_stopper_b = EarlyStopping(monitor = 'val_loss', patience=10, restore_best_weights=True, verbose=1)
 
 print('Treinando o modelo A')
 
-training_a = model_a.fit(X_train_A, y_train_A, validation_data=(X_val_A, y_val_A), batch_size=batch_size, epochs=epochs, callbacks=[early_stopper_a])
+training_a = model_a.fit(X_train_processed, y_train_encoded, validation_data=(X_val_processed, y_val_encoded), batch_size=batch_size, epochs=epochs, callbacks=[early_stopper_a])
 
 print('Treinando o modelo B')
 
-training_b = model_b.fit(X_train_B, y_train_B, validation_data=(X_val_B, y_val_B), batch_size=batch_size, epochs=epochs, callbacks=[early_stopper_b])
+training_b = model_b.fit(X_train_processed, y_train_encoded, validation_data=(X_val_processed, y_val_encoded), batch_size=batch_size, epochs=epochs, callbacks=[early_stopper_b])
 
 print('Lendo o dataset de teste')
 df_test = pd.read_csv(testing_csv)
@@ -223,19 +223,19 @@ print('Fase de testes para os modelos A e B')
 
 half_point_testing = len(X_test_processed) // 2
 
-X_test_A = X_test_processed[:half_point_testing]
-y_test_A = y_test_encoded[:half_point_testing]
+#X_test_A = X_test_processed[:half_point_testing]
+#y_test_A = y_test_encoded[:half_point_testing]
 
-X_test_B = X_test_processed[half_point_testing:]
-y_test_B = y_test_encoded[half_point_testing:]
+#X_test_B = X_test_processed[half_point_testing:]
+#y_test_B = y_test_encoded[half_point_testing:]
 
-predictions_A_prob = model_a.predict(X_test_A)
+predictions_A_prob = model_a.predict(X_test_processed)
 predictions_A = np.argmax(predictions_A_prob, axis=-1)
 
-predictions_B_prob = model_b.predict(X_test_B)
+predictions_B_prob = model_b.predict(X_test_processed)
 predictions_B = np.argmax(predictions_B_prob, axis=-1)
 
-versao = 3
+versao = 'mesmo_conjunto_de_dados'
 pasta_destino = "plots_e_resultados/treino_modelo/versao_{}".format(versao)
 os.makedirs(pasta_destino, exist_ok=True)
 
@@ -247,8 +247,8 @@ nome_arquivo_matriz_binaria_A = '{}/matriz_binaria_modelo_A.png'.format(pasta_de
 nome_arquivo_matriz_binaria_B = '{}/matriz_binaria_modelo_B.png'.format(pasta_destino)
 nome_modelo_A = 'nids_sensor_A_versao_{}.keras'.format(versao)
 nome_modelo_B = 'nids_sensor_B_versao_{}.keras'.format(versao)
-nome_arquivo_test_A = 'dados_originais_teste_A.pkl'
-nome_arquivo_test_B = 'dados_original_teste_B.pkl'
+nome_arquivo_test_A = 'dados_originais_teste_A_{}.pkl'.format(versao)
+nome_arquivo_test_B = 'dados_original_teste_B_{}.pkl'.format(versao)
 
 # Salvando em formato pickle os dados originais
 
@@ -257,8 +257,8 @@ benign_index = list(label_encoder.classes_).index('BenignTraffic')
 target_names = label_encoder.classes_
 
 original_data_dict_A = {
-        'X_test_A': X_test_A,
-        'y_test_A': y_test_A,
+        'X_test_A': X_test_processed,
+        'y_test_A': y_test_encoded,
         'target_names': target_names,
         'num_classes': len(target_names),
         'benign_index': benign_index
@@ -268,8 +268,8 @@ with open(nome_arquivo_test_A, 'wb') as f_a:
     pickle.dump(original_data_dict_A, f_a)
 
 original_data_dict_B={
-        'X_test_B': X_test_B,
-        'y_test_B': y_test_B,
+        'X_test_B': X_test_processed,
+        'y_test_B': y_test_encoded,
         'target_names': target_names,
         'num_classes': len(target_names),
         'benign_index': benign_index
@@ -279,10 +279,10 @@ with open(nome_arquivo_test_B, 'wb') as f_b:
     pickle.dump(original_data_dict_B, f_b)
 
 print("Métricas de A:")
-report_A_geral = classification_report(y_test_A, predictions_A, target_names=target_names)
+report_A_geral = classification_report(y_test_encoded, predictions_A, target_names=target_names)
 
 print("Métricas de B:")
-report_B_geral = classification_report(y_test_B, predictions_B, target_names=target_names)
+report_B_geral = classification_report(y_test_encoded, predictions_B, target_names=target_names)
 
 with open(nome_arquivo_report_A, "w", encoding='utf-8') as f:
     f.write(report_A_geral)
@@ -307,13 +307,13 @@ def plot_confusion_matrix(y_true, y_pred, title, filename):
     
     plt.close()
 
-plot_confusion_matrix(y_test_A, predictions_A, 'Modelo A', nome_arquivo_matriz_imagem_A)
-plot_confusion_matrix(y_test_B, predictions_B, 'Modelo B', nome_arquivo_matriz_imagem_B)
+plot_confusion_matrix(y_test_encoded, predictions_A, 'Modelo A', nome_arquivo_matriz_imagem_A)
+plot_confusion_matrix(y_test_encoded, predictions_B, 'Modelo B', nome_arquivo_matriz_imagem_B)
 
-y_test_A_binary = (y_test_A != benign_index).astype(int)
+y_test_A_binary = (y_test_encoded != benign_index).astype(int)
 predictions_A_binary = (predictions_A != benign_index).astype(int)
 
-y_test_B_binary = (y_test_B != benign_index).astype(int)
+y_test_B_binary = (y_test_encoded != benign_index).astype(int)
 predictions_B_binary = (predictions_B != benign_index).astype(int)
 
 target_names_binary = ['Benign (0)', 'Malign (1)']
@@ -338,3 +338,4 @@ with open(nome_modelo_A.replace('.keras', '') + '_summary.txt', "w") as f:
 
 with open(nome_modelo_B.replace('.keras', '') + '_summary.txt', 'w') as f:
     model_b.summary(print_fn=lambda x: f.write(x+"\n"))
+
