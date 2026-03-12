@@ -5,3 +5,4 @@ __pycache__
 *.keras
 *.txt
 *.pkl
+plots_e_resultados/*
