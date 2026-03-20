@@ -195,7 +195,7 @@ print(f"Alvo: {len(X_test_malicious)} pacotes malignos confirmados.\n")
 targets_one_hot = np.zeros((len(X_test_malicious), num_classes))
 targets_one_hot[:, benign_index] = 1.0
 
-epsilons = [0.001, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5]
+epsilons = [0.002, 0.003]
 
 grpc_options = [
     ('grpc.max_send_message_length', 256 * 1024 * 1024),

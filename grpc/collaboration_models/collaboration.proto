@@ -7,6 +7,8 @@ package nids;
 service NidsCollaboration {
   // Model A calls this to ask Model B for a second opinion
   rpc RequestPrediction (FlowBatch) returns (PredictionBatch) {}
+
+  rpc GetModelWeights (WeightRequest) returns (WeightResponse) {}
 }
 
 // The incoming network traffic (The attack)
@@ -22,4 +24,13 @@ message PredictionBatch {
   // Returns a list of predicted classes (0 for Benign, 1-33 for Attacks)
   repeated int32 predictions = 1;
   repeated float confidences = 2;
+}
+
+message WeightRequest{
+    string request_message = 1;
+}
+
+message WeightResponse{
+    bytes model_weights = 1;
+    string architecture_json = 2;
 }
